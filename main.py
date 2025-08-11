@@ -43,7 +43,7 @@ output_dir = './'
 saved_model_name = 'model'
 save_interval = 2000
 batch_size = 8 #32 era o original
-n_iter = 21000
+n_iter = 4000
 lr_interval = 100
 
 
@@ -346,26 +346,27 @@ def get_batch(batch_size,num_targets):
     return triple
 
 def save_keras_model(model):
-    model.save(output_dir+saved_model_name+'.h5')
+    model.save(output_dir + saved_model_name + '.h5')
     print("Saved model to disk")
+
 print("Starting training process!")
 print("-------------------------------------")
 
-targets_train = np.zeros([batch_size,1])
+targets_train = np.zeros([batch_size, 1], dtype=np.float32)
+
 for i in range(1, n_iter):
-    inputs=get_batch(batch_size,num_targets)
-    loss_value=model.train_on_batch(inputs,targets_train)
-    
+    inputs = get_batch(batch_size, num_targets)
+    loss_value = model.train_on_batch(inputs, targets_train)
 
     print("\n ------------- \n")
-    print('Iteration: '+ str(i) +'. '+ "Loss: {0}".format(loss_value))
-    
+    print('Iteration: ' + str(i) + '. ' + "Loss: {0}".format(loss_value))
+
     if i % save_interval == 0:
         save_keras_model(model)
-        
-    if i % lr_interval ==0:
-        start_lr = 0.99*start_lr
-        tf.keras.backend.set_value(model.optimizer.learning_rate, start_lr)
+
+    if i % lr_interval == 0:
+        start_lr = 0.99 * start_lr
+        model.optimizer.learning_rate.assign(start_lr) 
 
 save_keras_model(model)
 shared_model = model.layers[3]
